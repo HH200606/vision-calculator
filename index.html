@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>机器视觉选型计算器 · 相机与镜头</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --border: #e2e5ea;
+    --text: #1a1d23;
+    --text-2: #5a6270;
+    --text-3: #8b93a1;
+    --accent: #2563eb;
+    --accent-soft: #eff4ff;
+    --good: #16a34a;
+    --warn: #d97706;
+    --bad: #dc2626;
+    --shadow: 0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.06);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding: 24px 16px 64px;
+  }
+
+  .wrap { max-width: 1080px; margin: 0 auto; }
+
+  header { margin-bottom: 24px; }
+  header h1 {
+    font-size: 22px;
+    font-weight: 650;
+    letter-spacing: -.01em;
+    margin-bottom: 4px;
+  }
+  header p { font-size: 13px; color: var(--text-3); }
+
+  .layout { display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+  }
+
+  .panel { padding: 20px; }
+  .panel-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 550;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .field .hint { font-size: 11.5px; color: var(--text-3); font-weight: 400; margin-top: 5px; display: block; }
+
+  .input-group { position: relative; }
+  .input-group input {
+    width: 100%;
+    padding: 9px 46px 9px 12px;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    font-family: inherit;
+  }
+  .input-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+  }
+  .input-group .unit {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 12.5px;
+    color: var(--text-3);
+    pointer-events: none;
+  }
+
+  .seg {
+    display: flex;
+    background: #f0f2f5;
+    border-radius: 7px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg button {
+    flex: 1;
+    padding: 6px 4px;
+    font-size: 12.5px;
+    font-weight: 500;
+    border: none;
+    background: transparent;
+    color: var(--text-2);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .seg button:hover { color: var(--text); }
+  .seg button.on {
+    background: #fff;
+    color: var(--accent);
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(16,24,40,.08);
+  }
+
+  .btn {
+    width: 100%;
+    padding: 11px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    transition: background .15s;
+    font-family: inherit;
+    margin-top: 4px;
+  }
+  .btn:hover { background: #1d4ed8; }
+  .btn:active { transform: translateY(.5px); }
+
+  /* ---- result area ---- */
+  .empty {
+    padding: 80px 24px;
+    text-align: center;
+    color: var(--text-3);
+    font-size: 13.5px;
+  }
+  .empty .big { font-size: 32px; margin-bottom: 12px; opacity: .25; }
+
+  .result { display: none; }
+  .result.show { display: block; }
+
+  .hero {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .hero-main { flex: 1; min-width: 240px; }
+  .hero-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 6px;
+  }
+  .hero-value { font-size: 26px; font-weight: 650; letter-spacing: -.02em; line-height: 1.2; }
+  .hero-value .sub { font-size: 14px; font-weight: 500; color: var(--text-2); }
+  .hero-meta { font-size: 12.5px; color: var(--text-3); margin-top: 5px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge.ok { background: #dcfce7; color: #15803d; }
+  .badge.warn { background: #fef3c7; color: #b45309; }
+  .badge.err { background: #fee2e2; color: #b91c1c; }
+
+  .cards { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+
+  .spec-card {
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    overflow: hidden;
+  }
+  .spec-head {
+    padding: 11px 14px;
+    background: #fafbfc;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .spec-body { padding: 4px 14px 12px; }
+  .spec-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px dashed #eef0f3;
+    font-size: 13px;
+    gap: 12px;
+  }
+  .spec-row:last-child { border-bottom: none; }
+  .spec-row .k { color: var(--text-2); flex-shrink: 0; }
+  .spec-row .v {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .spec-row .v small { font-weight: 400; color: var(--text-3); font-size: 11.5px; }
+
+  .metrics { padding: 0 20px 20px; }
+  .metrics-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 10px;
+  }
+  .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 640px) { .metric-grid { grid-template-columns: 1fr; } }
+
+  .metric {
+    padding: 13px 14px;
+    border-radius: 8px;
+    background: #fafbfc;
+    border: 1px solid var(--border);
+  }
+  .metric .m-label { font-size: 11.5px; color: var(--text-3); margin-bottom: 5px; }
+  .metric .m-value { font-size: 17px; font-weight: 650; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+  .metric .m-value small { font-size: 11.5px; font-weight: 500; color: var(--text-3); margin-left: 2px; }
+  .metric .m-sub { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+
+  .notes {
+    margin: 0 20px 20px;
+    padding: 14px 16px;
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 7px 7px 0;
+    font-size: 12.5px;
+    color: #1e40af;
+    line-height: 1.65;
+  }
+  .notes b { font-weight: 650; }
+  .notes ul { margin: 6px 0 0 16px; }
+  .notes li { margin-bottom: 5px; }
+  .notes li:last-child { margin-bottom: 0; }
+
+  .formula {
+    margin: 0 20px 20px;
+    padding: 14px 16px;
+    background: #fafbfc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .formula-title { font-size: 11.5px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 9px; }
+  .formula code {
+    display: block;
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 2;
+    word-break: break-word;
+  }
+  .formula code em { color: var(--accent); font-style: normal; font-weight: 600; }
+
+  .footnote {
+    margin-top: 20px;
+    font-size: 11.5px;
+    color: var(--text-3);
+    line-height: 1.7;
+    padding: 0 2px;
+  }
+  .footnote b { color: var(--text-2); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>机器视觉选型计算器</h1>
+    <p>输入视野与精度要求，自动推导相机像素、靶面与镜头焦距</p>
+  </header>
+
+  <div class="layout">
+
+    <!-- ======== 输入面板 ======== -->
+    <div class="card panel">
+      <div class="panel-title">检测需求</div>
+
+      <div class="field">
+        <label>最大视野 FOV</label>
+        <div class="input-group">
+          <input type="number" id="fov" value="200" step="1" min="1">
+          <span class="unit">mm</span>
+        </div>
+        <span class="hint">长边方向的可视范围</span>
+      </div>
+
+      <div class="field">
+        <label>精度要求</label>
+        <div class="input-group">
+          <input type="number" id="prec" value="0.1" step="0.01" min="0.001">
+          <span class="unit">mm</span>
+        </div>
+        <span class="hint">需稳定检出的最小尺寸 / 缺陷</span>
+      </div>
+
+      <div class="field">
+        <label>工作距离 WD</label>
+        <div class="input-group">
+          <input type="number" id="wd" value="500" step="10" min="10">
+          <span class="unit">mm</span>
+        </div>
+        <span class="hint">镜头前端到被测物距离</span>
+      </div>
+
+      <div class="field">
+        <label>安全系数</label>
+        <div class="seg" id="segSafety">
+          <button data-v="2">2× 极限</button>
+          <button data-v="3" class="on">3× 推荐</button>
+          <button data-v="4">4× 稳健</button>
+        </div>
+        <span class="hint">像素精度 = 精度 ÷ 系数，值越大越稳定</span>
+      </div>
+
+      <div class="field">
+        <label>镜头类型</label>
+        <div class="seg" id="segLens">
+          <button data-v="fa" class="on">FA 定焦</button>
+          <button data-v="tele">远心</button>
+        </div>
+        <span class="hint">远心无透视误差，但视野受限、成本高</span>
+      </div>
+
+      <div class="field">
+        <label>画面比例</label>
+        <div class="seg" id="segRatio">
+          <button data-v="4:3" class="on">4:3</button>
+          <button data-v="16:9">16:9</button>
+          <button data-v="1:1">1:1</button>
+        </div>
+      </div>
+
+      <button class="btn" id="calcBtn">计算推荐规格</button>
+    </div>
+
+    <!-- ======== 结果区 ======== -->
+    <div class="card" id="resultCard">
+      <div class="empty" id="emptyState">
+        <div class="big">◎</div>
+        填写左侧参数后点击「计算推荐规格」
+      </div>
+      <div class="result" id="resultBody"></div>
+    </div>
+
+  </div>
+
+  <div class="footnote">
+    <b>计算说明：</b>所需像素 = 视野 ÷ (精度 ÷ 安全系数)，向上匹配标准分辨率档位；焦距 = 靶面长边 × 工作距离 ÷ 视野。
+    实际选型还需校验景深、镜头靶面覆盖率、畸变率与光照条件。本工具给出的是理论起点，工程落地前建议实拍验证。
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- 相机规格库 ---------------- */
+  // 常见工业面阵相机档位：名称、长边像素、短边像素、靶面长边(mm)、靶面短边(mm)、靶面英寸
+  const CAMS = [
+    { name: '500 万',   w: 2448, h: 2048, sw: 8.45,  sh: 7.07,  inch: '2/3"' },
+    { name: '1200 万',  w: 4024, h: 3036, sw: 17.6,  sh: 13.2,  inch: '1.1"' },
+    { name: '900 万',   w: 4096, h: 2160, sw: 14.26, sh: 7.52,  inch: '1.1"' },
+    { name: '2400 万',  w: 5328, h: 4608, sw: 18.5,  sh: 16.0,  inch: '1.2"' },
+    { name: '2000 万',  w: 5472, h: 3648, sw: 12.8,  sh: 8.53,  inch: '1"' },
+    { name: '4500 万',  w: 8192, h: 5464, sw: 17.6,  sh: 11.7,  inch: '1.1"' },
+    { name: '6500 万',  w: 9344, h: 7000, sw: 18.0,  sh: 13.5,  inch: '1.2"' }
+  ];
+  // 按长边像素升序，保证 find() 取到的是"刚好够用"的最小档位
+  CAMS.sort((a, b) => a.w - b.w);
+
+  /* 常设定焦镜头焦距（覆盖远距离长焦需求） */
+  const FOCALS_FA   = [4, 6, 8, 12, 16, 20, 25, 35, 50, 75, 100, 120, 150, 200, 300];
+  /* 双远心镜头标准倍率档位 */
+  const FOCALS_TELE = [0.05, 0.075, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5,
+                       0.75, 1, 1.5, 2, 3, 4, 6, 8];
+
+  /* 状态 */
+  const state = { safety: 3, lens: 'fa', ratio: '4:3' };
+
+  /* ---------------- 工具 ---------------- */
+  const $ = id => document.getElementById(id);
+
+  function fmtMM(v) {
+    if (!isFinite(v)) return '—';
+    if (v >= 100) return v.toFixed(0);
+    if (v >= 10)  return v.toFixed(1);
+    if (v >= 1)   return v.toFixed(2);
+    return v.toFixed(3);
+  }
+  function fmtPx(v) {
+    if (v >= 10000) return (v / 10000).toFixed(2) + ' 亿';
+    return v + ' 万';
+  }
+  function ratioParts(r) {
+    const p = r.split(':').map(Number);
+    return { rw: p[0], rh: p[1] };
+  }
+
+  /* ---------------- 计算核心 ---------------- */
+  function compute() {
+    const fov  = parseFloat($('fov').value);
+    const prec = parseFloat($('prec').value);
+    const wd   = parseFloat($('wd').value);
+
+    if (!(fov > 0) || !(prec > 0) || !(wd > 0)) return null;
+
+    // 1. 所需像素精度与像素数
+    const pxPrec   = prec / state.safety;
+    const needPxW  = Math.ceil(fov / pxPrec);
+
+    // 2. 匹配相机档位（按长边像素，CAMS 已升序，find 得到"刚好够用"的最小档位）
+    let cam = CAMS.find(c => c.w >= needPxW);
+    let camShort = false;
+    let camNote = '';
+    if (!cam) {
+      cam = CAMS[CAMS.length - 1];
+      camShort = true;
+      camNote = `所需横向 ${needPxW.toLocaleString()}px 超出常规面阵相机上限（${cam.w}px）。建议：①改用多相机拼接 ②分区多次拍摄 ③降低安全系数至 2× 再评估`;
+    }
+
+    // 3. 按目标视野的线性像素精度
+    const realPxPrec = fov / cam.w;
+    const detectPrec = realPxPrec * state.safety;
+
+    // 4. 焦距
+    const ratio = ratioParts(state.ratio);
+    // 依据所选比例重新推导靶面有效长边
+    // 相机靶面按实际规格，但视野比例跟随用户选择
+    const sensorLong = cam.sw;
+
+    // 选择镜头：让实际视野"刚好覆盖"目标视野，且不浪费分辨率
+    // FA 镜头：焦距↑ → 视野↓。取使 realFov ≤ 目标FOV 的焦距中最小者（最贴近目标、不浪费）
+    // 远心镜头：倍率↑ → 视野↓。同理取最小满足者
+    const focalList = state.lens === 'fa' ? FOCALS_FA : FOCALS_TELE;
+    const focal = state.lens === 'fa' ? (sensorLong * wd) / fov : sensorLong / fov;
+
+    let chosenFocal, overRange = false;
+    const toFov = v => state.lens === 'fa' ? (sensorLong * wd) / v : sensorLong / v;
+
+    // 目标：realFov 尽量接近 fov 但不超出（留 0~10% 余量）
+    // 对 FA：候选焦距需满足 toFov(f) <= fov * 1.1，取其中视野最大者 = 焦距最小者
+    const limit = fov * 1.1;
+    const cands = focalList.filter(f => toFov(f) <= limit);
+
+    if (cands.length) {
+      // 视野最大（最接近上限）即焦距最小
+      chosenFocal = Math.min(...cands);
+    } else {
+      // 所有焦距的视野都大于目标（焦距都太小），取最大焦距
+      chosenFocal = Math.max(...focalList);
+      overRange = true;
+    }
+
+    // 5. 用选定焦距反算实际视野
+    const realFov  = toFov(chosenFocal);
+    const realFovH = realFov * (ratio.rh / ratio.rw);
+
+    // 6. 实际像素精度（按真实视野）
+    const finalPxPrec = realFov / cam.w;
+    const finalDetect = finalPxPrec * state.safety;
+
+    // 7. 判定（按优先级：像素不足 > 精度不足 > 视野受限 > 精度余量）
+    let verdict, verdictClass;
+    const slack = finalDetect / prec; // 实际检测精度 / 要求精度，越小越好
+    if (camShort)          { verdict = '像素不足'; verdictClass = 'err'; }
+    else if (slack > 1.05) { verdict = '精度不足'; verdictClass = 'err'; }
+    else if (overRange)    { verdict = '视野受限'; verdictClass = 'warn'; }
+    else if (slack <= 0.7) { verdict = '余量充足'; verdictClass = 'ok'; }
+    else                   { verdict = '刚好达标'; verdictClass = 'ok'; }
+
+    // 8. 景深估算（弥散圆 δ 取 2 个像元，F5.6）
+    // FA：DOF = 2·F·δ / m²，m = f/WD
+    const pxSize = (cam.sw * 1000) / cam.w; // μm
+    const F_NO = 5.6;
+    let dof = 0;
+    if (state.lens === 'fa' && chosenFocal > 0) {
+      const delta = 2 * pxSize / 1000;            // mm，弥散圆
+      const mag = chosenFocal / wd;               // 光学放大率 f/WD
+      dof = 2 * F_NO * delta / (mag * mag);       // mm
+    } else {
+      // 远心镜头景深通常 0.5~3mm，随倍率变化
+      dof = state.lens === 'tele' ? 1.5 : 0;
+    }
+
+    return {
+      fov, prec, wd,
+      pxPrec, needPxW,
+      cam, camNote, camShort,
+      realPxPrec, detectPrec,
+      focal, chosenFocal, overRange,
+      realFov, realFovH,
+      finalPxPrec, finalDetect,
+      verdict, verdictClass, slack,
+      pxSize, dof,
+      sensorLong
+    };
+  }
+
+  /* ---------------- 渲染 ---------------- */
+  function render(r) {
+    if (!r) return;
+    const body = $('resultBody');
+    const empty = $('emptyState');
+
+    const lensName = state.lens === 'fa'
+      ? `FA 定焦 ${r.chosenFocal}mm`
+      : `远心镜头 ${r.chosenFocal}×`;
+
+    const lensSub = state.lens === 'fa'
+      ? `焦距 ${r.chosenFocal}mm · 靶面需 ${r.cam.inch}`
+      : `放大倍率 ${r.chosenFocal}× · 远心度 ≥ 0.1°`;
+
+    body.innerHTML = `
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-main">
+          <div class="hero-label">推荐配置</div>
+          <div class="hero-value">${r.cam.name}像素 <span class="sub">${r.cam.w} × ${r.cam.h}</span></div>
+          <div class="hero-meta">${lensName} · 工作距离 ${r.wd}mm · ${r.cam.inch} 靶面</div>
+        </div>
+        <div class="badge ${r.verdictClass}">● ${r.verdict}</div>
+      </div>
+
+      <!-- 规格卡 -->
+      <div class="cards">
+        <div class="spec-card">
+          <div class="spec-head">📷 相机</div>
+          <div class="spec-body">
+            <div class="spec-row"><span class="k">分辨率</span><span class="v">${r.cam.w} × ${r.cam.h}</span></div>
+            <div class="spec-row"><span class="k">像素数</span><span class="v">${(r.cam.w * r.cam.h / 1e6).toFixed(1)} MP</span></div>
+            <div class="spec-row"><span class="k">靶面尺寸</span><span class="v">${r.cam.inch} <small>${r.cam.sw}×${r.cam.sh}mm</small></span></div>
+            <div class="spec-row"><span class="k">像元尺寸</span><span class="v">${r.pxSize.toFixed(2)} μm</span></div>
+            <div class="spec-row"><span class="k">快门类型</span><span class="v">全局快门 <small>推荐</small></span></div>
+            <div class="spec-row"><span class="k">接口</span><span class="v">${r.cam.w >= 5000 ? 'CoaXPress / 10GigE' : 'GigE / USB3'}</span></div>
+          </div>
+        </div>
+
+        <div class="spec-card">
+          <div class="spec-head">🔍 镜头</div>
+          <div class="spec-body">
+            <div class="spec-row"><span class="k">类型</span><span class="v">${state.lens === 'fa' ? '定焦 FA 镜头' : '双远心镜头'}</span></div>
+            <div class="spec-row"><span class="k">${state.lens === 'fa' ? '焦距' : '倍率'}</span><span class="v">${r.chosenFocal} ${state.lens === 'fa' ? 'mm' : '×'}</span></div>
+            <div class="spec-row"><span class="k">${state.lens === 'fa' ? '理论焦距' : '理论倍率'}</span><span class="v">${r.focal.toFixed(2)} ${state.lens === 'fa' ? 'mm' : '×'} <small>线性算值</small></span></div>
+            <div class="spec-row"><span class="k">靶面支持</span><span class="v">≥ ${r.cam.inch}</span></div>
+            <div class="spec-row"><span class="k">光圈</span><span class="v">F4 – F8 <small>可调</small></span></div>
+            <div class="spec-row"><span class="k">接口</span><span class="v">${r.cam.inch === '2/3"' ? 'C-mount' : 'C / F-mount'}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 关键指标 -->
+      <div class="metrics">
+        <div class="metrics-title">验证指标</div>
+        <div class="metric-grid">
+          <div class="metric">
+            <div class="m-label">实际视野</div>
+            <div class="m-value">${fmtMM(r.realFov)} <small>×</small> ${fmtMM(r.realFovH)} <small>mm</small></div>
+            <div class="m-sub">${state.ratio} 比例</div>
+          </div>
+          <div class="metric">
+            <div class="m-label">像素精度</div>
+            <div class="m-value">${r.finalPxPrec.toFixed(4)} <small>mm/px</small></div>
+            <div class="m-sub">${(r.finalPxPrec * 1000).toFixed(1)} μm/px</div>
+          </div>
+          <div class="metric">
+            <div class="m-label">可检测精度</div>
+            <div class="m-value" style="color:${r.finalDetect <= r.prec ? 'var(--good)' : 'var(--bad)'}">${r.finalDetect.toFixed(3)} <small>mm</small></div>
+            <div class="m-sub">要求 ${r.prec}mm · 系数 ${state.safety}×</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 提示 -->
+      <div class="notes">
+        <b>选型提示</b>
+        <ul>
+          ${r.camNote ? `<li><b>${r.camNote}</b></li>` : ''}
+          <li>所需横向像素 <b>${r.needPxW.toLocaleString()} px</b>，匹配到 <b>${r.cam.name}像素</b>（${r.cam.w}px）${r.cam.w >= r.needPxW ? '，满足要求' : '，<b>不满足</b>'}。</li>
+          <li>实际视野 <b>${fmtMM(r.realFov)}mm</b>，相对目标 ${r.fov}mm ${Math.abs(r.realFov / r.fov - 1) <= 0.12 ? '偏差在 ±12% 内，可用' : `偏差 <b>${((r.realFov / r.fov - 1) * 100).toFixed(0)}%</b>，建议微调工作距离补偿`}。</li>
+          ${state.lens === 'fa'
+            ? `<li>F5.6 下景深约 <b>${r.dof.toFixed(1)}mm</b>${r.dof < 2 ? '，<b>景深偏紧</b>，被测物有高度差时须缩小光圈或改用远心镜头' : ''}。</li>`
+            : `<li>远心镜头<b>工作距离固定</b>，不能靠调 WD 改视野；倍率 ${r.chosenFocal}× 对应视野约 ${fmtMM(r.realFov)}mm，须在订货时确认规格。</li>`}
+          <li>镜头靶面必须 ≥ <b>${r.cam.inch}</b>，否则画面四角出现暗角（暗角直接损失有效视野）。</li>
+        </ul>
+      </div>
+
+      <!-- 公式 -->
+      <div class="formula">
+        <div class="formula-title">计算过程</div>
+        <code>
+          像素精度 = ${r.prec} ÷ ${state.safety} = <em>${r.pxPrec.toFixed(4)} mm/px</em><br>
+          所需像素 = ${r.fov} ÷ ${r.pxPrec.toFixed(4)} = <em>${r.needPxW.toLocaleString()} px</em><br>
+          ${state.lens === 'fa'
+            ? `理论焦距 = (${r.sensorLong} × ${r.wd}) ÷ ${r.fov} = <em>${r.focal.toFixed(2)} mm</em> → 选 ${r.chosenFocal}mm<br>
+               反算视野 = (${r.sensorLong} × ${r.wd}) ÷ ${r.chosenFocal} = <em>${fmtMM(r.realFov)} mm</em>`
+            : `理论倍率 = ${r.sensorLong} ÷ ${r.fov} = <em>${r.focal.toFixed(2)}×</em> → 选 ${r.chosenFocal}×<br>
+               反算视野 = ${r.sensorLong} ÷ ${r.chosenFocal} = <em>${fmtMM(r.realFov)} mm</em>`}
+        </code>
+      </div>
+    `;
+
+    empty.style.display = 'none';
+    body.classList.add('show');
+  }
+
+  /* ---------------- 事件 ---------------- */
+  function bindSeg(id, key, cb) {
+    const el = $(id);
+    el.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        el.querySelectorAll('button').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+        state[key] = isNaN(Number(btn.dataset.v)) ? btn.dataset.v : Number(btn.dataset.v);
+        if (cb) cb();
+      });
+    });
+  }
+
+  bindSeg('segSafety', 'safety');
+  bindSeg('segLens', 'lens');
+  bindSeg('segRatio', 'ratio');
+
+  $('calcBtn').addEventListener('click', () => render(compute()));
+
+  // 回车即算
+  ['fov', 'prec', 'wd'].forEach(id => {
+    $(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') render(compute());
+    });
+  });
+
+  // 首次自动算一遍，让页面不空
+  render(compute());
+})();
+</script>
+</body>
+</html>
