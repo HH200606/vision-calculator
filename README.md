@@ -6,11 +6,13 @@
 
 ---
 
-## 在线使用
+## 🌐 在线使用（点击即用）
 
-直接打开 `index.html` 即可，无需安装、无需联网、无需构建。
+**👉 https://hh200606.github.io/vision-calculator/ 👈**
 
-也可以部署到任意静态托管（GitHub Pages / Vercel / Netlify），或直接双击本地文件运行。
+无需安装、无需构建，手机和电脑浏览器均可直接打开使用。
+
+也可以 [下载仓库](https://github.com/HH200606/vision-calculator/archive/refs/heads/master.zip) 后双击 `index.html` 离线运行。
 
 ## 功能
 
